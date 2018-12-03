@@ -5,14 +5,9 @@ import urllib.parse
 import os
 from bs4 import BeautifulSoup
 
-
-def get_parent_dir(path):
-    return os.path.split(path)[0]
-
-
 FILE_PATH = os.path.dirname(__file__)
-PROJECT_PATH = get_parent_dir(
-    get_parent_dir(get_parent_dir(get_parent_dir(FILE_PATH))))
+PROJECT_PATH = os.path.join(FILE_PATH, os.pardir, os.pardir, os.pardir,
+                            os.pardir)
 SAVING_DIRECTORY = "scrap_files"
 
 
@@ -21,9 +16,7 @@ class Hl7Spider(scrapy.Spider):
     root_url = "http://www.hl7.org/fhir/"
     saving_path = os.path.join(PROJECT_PATH, SAVING_DIRECTORY)
 
-    custom_settings = {
-        'DOWNLOAD_DELAY': 1
-    }
+    custom_settings = {'DOWNLOAD_DELAY': 1}
 
     def start_requests(self):
         if not os.path.exists(self.saving_path):
@@ -53,10 +46,12 @@ class Hl7Spider(scrapy.Spider):
         parent_category = 'Datatypes'
         category = '.'
 
-        json_htmls = response.css("#json").css("#json-inner").css("pre").extract()
+        json_htmls = response.css("#json").css("#json-inner").css(
+            "pre").extract()
         for i, json_html in enumerate(json_htmls):
             title = titles[i]
-            self.dump_json_to_file(response, json_html, parent_category, category, title)
+            self.dump_json_to_file(response, json_html, parent_category,
+                                   category, title)
 
     def parse(self, response):
         R2_table_rows = response.css("#tabs-3").css("tr")
@@ -110,9 +105,12 @@ class Hl7Spider(scrapy.Spider):
 
         json_html = response.css("#json").css("#json-inner").css(
             "pre").extract_first()
-        self.dump_json_to_file(response, json_html, parent_category, category, title)
+        self.dump_json_to_file(response, json_html, parent_category, category,
+                               title)
 
-    def dump_json_to_file(self, response, json_html, parent_category, category, title):
+    def dump_json_to_file(self, response, json_html, parent_category, category,
+                          title):
+        import pdb; pdb.set_trace()
         if json_html:
             json_html = json_html.strip()
             json_text = BeautifulSoup(json_html, 'lxml').text

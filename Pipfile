@@ -14,4 +14,4 @@ ipython = "*"
 "beautifulsoup4" = "*"
 scrapy = "*"
 inscriptis = "*"
-
+vcrpy = "*"
