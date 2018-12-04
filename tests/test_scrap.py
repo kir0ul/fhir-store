@@ -3,11 +3,12 @@ from process import Hl7Spider
 import vcr
 import os
 from unittest.mock import MagicMock
+from bs4 import BeautifulSoup
 
-EXPECTED_JSON_PATH = os.path.join("tests", "data", "corrupted", "patient.json")
-CURRENT_JSON_PATH = os.path.join("resources", "json",
-                                 "Identification", "Individuals",
-                                 "Patient.json")
+EXPECTED_JSON_PATH = os.path.join("tests", "data", "scraped_ref",
+                                  "Patient.json")
+CURRENT_JSON_PATH = os.path.join("resources", "json", "Identification",
+                                 "Individuals", "Patient.json")
 CASSETTE_DIR = os.path.join(
     os.path.dirname(os.path.relpath(__file__)), "cassettes")
 # if not os.path.exists(CASSETTE_DIR):
@@ -39,10 +40,20 @@ def test_spider(monkeypatch):
     assert expected_json_txt == current_json_txt
 
 
-def mocked_json_dump(args):
+def mocked_json_dump(*args):
     """Mocked function to to only write one JSON to disk"""
-    import ipdb; ipdb.set_trace()
     if args[-1] == "Patient":
-        return Hl7Spider().dump_json_to_file(args)
+        # Remove the `self` argument
+        return write_json_file(*args[1:])
     else:
         return MagicMock()
+
+
+def write_json_file(response, json_html, parent_category, category, title):
+    """Rewritten funtion since the original one has been mocked"""
+    json_html = json_html.strip()
+    json_text = BeautifulSoup(json_html, 'lxml').text
+    if not os.path.exists(os.path.dirname(CURRENT_JSON_PATH)):
+        os.makedirs(os.path.dirname(CURRENT_JSON_PATH))
+    with open(CURRENT_JSON_PATH, 'w') as f:
+        f.write(json_text)

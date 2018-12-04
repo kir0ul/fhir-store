@@ -110,7 +110,6 @@ class Hl7Spider(scrapy.Spider):
 
     def dump_json_to_file(self, response, json_html, parent_category, category,
                           title):
-        import pdb; pdb.set_trace()
         if json_html:
             json_html = json_html.strip()
             json_text = BeautifulSoup(json_html, 'lxml').text
