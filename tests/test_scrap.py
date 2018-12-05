@@ -1,25 +1,15 @@
 from scrapy.crawler import CrawlerProcess
 from process import Hl7Spider
-import vcr
 import os
 from unittest.mock import MagicMock
 from bs4 import BeautifulSoup
 
-EXPECTED_JSON_PATH = os.path.join("tests", "data", "scraped_ref",
-                                  "Patient.json")
-CURRENT_JSON_PATH = os.path.join("resources", "json", "Identification",
-                                 "Individuals", "Patient.json")
-CASSETTE_DIR = os.path.join(
-    os.path.dirname(os.path.relpath(__file__)), "cassettes")
-# if not os.path.exists(CASSETTE_DIR):
-#     os.mkdir(CASSETTE_DIR)
-spider_vcr = vcr.VCR(
-    cassette_library_dir=CASSETTE_DIR,
-    record_mode="once",
-    match_on=['method', 'scheme', 'host', 'port', 'query'])
+EXPECTED_JSON_PATH = os.path.join("tests", "data", "scraping",
+                                  "Patient_ref.json")
+CURRENT_JSON_PATH = os.path.join("tests", "data", "scraping",
+                                 "Patient_test.json")
 
 
-@spider_vcr.use_cassette
 def test_spider(monkeypatch):
     monkeypatch.setattr("process.Hl7Spider.dump_json_to_file",
                         mocked_json_dump)
@@ -38,6 +28,7 @@ def test_spider(monkeypatch):
     with open(CURRENT_JSON_PATH, "r") as current_json_handle:
         current_json_txt = current_json_handle.read()
     assert expected_json_txt == current_json_txt
+    os.remove(CURRENT_JSON_PATH)
 
 
 def mocked_json_dump(*args):
